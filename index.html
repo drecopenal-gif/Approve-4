@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#030305" />
+  <title>Premium Secure PayGate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #030305;
+      --card-bg: rgba(15, 17, 26, 0.65);
+      --card-border: rgba(255, 255, 255, 0.06);
+      --primary: #10b981;
+      --primary-glow: rgba(16, 185, 129, 0.4);
+      --accent: #06b6d4;
+      --accent-glow: rgba(6, 182, 212, 0.4);
+      --purple: #8b5cf6;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --danger: #fb7185;
+      --radius: 24px;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 14px;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Background Animations */
+    .orb {
+      position: fixed; border-radius: 50%; filter: blur(90px); z-index: 0;
+      animation: float 10s ease-in-out infinite alternate;
+      opacity: 0.5; pointer-events: none;
+    }
+    .orb-1 { width: 400px; height: 400px; background: var(--primary-glow); top: -10%; left: -10%; animation-delay: 0s; }
+    .orb-2 { width: 500px; height: 500px; background: var(--accent-glow); bottom: -10%; right: -10%; animation-delay: -3s; }
+    .orb-3 { width: 350px; height: 350px; background: rgba(139, 92, 246, 0.3); top: 40%; left: 50%; transform: translateX(-50%); animation-delay: -6s; }
+    
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(30px, -40px) scale(1.1); }
+    }
+
+    .grid-overlay {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+      -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+    }
+
+    .app { position: relative; z-index: 1; width: min(440px, 100%); perspective: 1000px; }
+
+    /* Glass Card Entry Animation */
+    .glass {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      padding: 32px 24px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255,255,255,0.1);
+      animation: cardEntrance 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      opacity: 0; transform: translateY(30px) scale(0.95);
+    }
+    
+    @keyframes cardEntrance {
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; animation: fadeUp 0.6s 0.2s both; }
+    .logo-badge {
+      width: 44px; height: 44px; border-radius: 14px;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(6,182,212,0.1));
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff; font-size: 1.2rem;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    .brand h1 { font-family: "Space Grotesk", sans-serif; font-size: 1.3rem; font-weight: 700; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .brand span { font-size: 0.75rem; color: var(--accent); display: block; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
+    
+    /* Text Animations */
+    .anim-item { animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+    .delay-1 { animation-delay: 0.3s; }
+    .delay-2 { animation-delay: 0.4s; }
+    .delay-3 { animation-delay: 0.5s; }
+    
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .amount-banner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-radius: 18px;
+      background: linear-gradient(145deg, rgba(16, 185, 129, 0.05), rgba(6, 182, 212, 0.05));
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      margin-bottom: 18px;
+      box-shadow: inset 0 0 20px rgba(16,185,129,0.05);
+    }
+    .amount-banner small { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+    .amount-banner b { font-family: "Space Grotesk"; font-size: 1.8rem; color: #34d399; font-weight: 700; text-shadow: 0 0 15px rgba(52, 211, 153, 0.4); }
+    
+    .selected-upi-badge { text-align: center; font-size: 0.8rem; color: var(--muted); margin-bottom: 18px; }
+    .selected-upi-badge strong { color: var(--accent); font-weight: 600; letter-spacing: 0.5px; }
+    
+    /* Premium QR Animation */
+    .qr-shell {
+      position: relative;
+      background: #ffffff; padding: 12px; border-radius: 22px;
+      width: 230px; height: 230px; margin: 0 auto 20px;
+      display: grid; place-items: center;
+      box-shadow: 0 15px 45px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+      overflow: hidden;
+      animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.4s both;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .qr-shell img { width: 100%; height: 100%; object-fit: contain; position: relative; z-index: 1; mix-blend-mode: multiply; }
+    
+    /* Scanner Line Animation */
+    .scanner-line {
+      position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+      background: var(--primary);
+      box-shadow: 0 0 20px 4px var(--primary-glow);
+      z-index: 2; opacity: 0.8;
+      animation: scan 2.5s ease-in-out infinite alternate;
+    }
+    @keyframes scan {
+      0% { top: 0%; opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { top: calc(100% - 4px); opacity: 0; }
+    }
+    
+    .guide-text { text-align: center; font-size: 0.85rem; color: var(--muted); line-height: 1.6; margin-bottom: 20px; font-weight: 500; }
+    
+    /* Inputs */
+    label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: #64748b; margin: 16px 0 8px; }
+    input, select {
+      width: 100%; height: 52px; border-radius: 16px;
+      background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #fff; padding: 0 16px; outline: none; font-size: 0.95rem;
+      font-family: inherit; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+    input:focus, select:focus {
+      background: rgba(16, 185, 129, 0.05);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15), inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+    input::placeholder { color: #475569; }
+
+    /* Premium Buttons */
+    .btn {
+      position: relative; width: 100%; height: 54px; border: 0; border-radius: 16px;
+      font-family: "Space Grotesk", sans-serif; font-size: 1rem; font-weight: 700;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); margin-top: 20px; text-decoration: none;
+      overflow: hidden;
+    }
+    .btn::before {
+      content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transform: skewX(-20deg); transition: 0s;
+    }
+    .btn:hover::before { left: 150%; transition: 0.7s ease-in-out; }
+    
+    .btn:hover { transform: translateY(-3px); }
+    .btn:active { transform: translateY(1px) scale(0.98); }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff; box-shadow: 0 12px 30px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .btn-primary:hover { box-shadow: 0 15px 40px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255,255,255,0.3); }
+    
+    .btn-accent {
+      background: linear-gradient(135deg, #06b6d4, #0284c7);
+      color: #fff; box-shadow: 0 12px 30px rgba(6, 182, 212, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .btn-accent:hover { box-shadow: 0 15px 40px rgba(6, 182, 212, 0.4), inset 0 1px 0 rgba(255,255,255,0.3); }
+    
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.03); color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+    }
+    .btn-ghost:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.2); }
+    
+    .code-box { text-align: center; font-size: 1.6rem; letter-spacing: 0.3em; font-weight: 700; font-family: "Space Grotesk"; color: #fff; }
+    
+    .notice-card {
+      background: rgba(6, 182, 212, 0.05); border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 18px; padding: 18px; font-size: 0.85rem; color: #cffafe;
+      line-height: 1.6; text-align: center; margin-top: 16px; backdrop-filter: blur(10px);
+    }
+    .notice-card.danger { background: rgba(248, 113, 113, 0.05); border-color: rgba(248, 113, 113, 0.25); color: #fecaca; }
+    
+    .field-error { color: var(--danger); font-size: 0.75rem; margin-top: 6px; font-weight: 500; }
+    
+    .hidden { display: none !important; }
+    
+    .foot { text-align: center; color: #475569; font-size: 0.75rem; margin-top: 24px; font-weight: 500; letter-spacing: 0.5px; }
+    .foot a { color: var(--accent); text-decoration: none; transition: 0.2s; }
+    .foot a:hover { color: #fff; text-shadow: 0 0 10px var(--accent-glow); }
+  </style>
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="grid-overlay"></div>
+
+  <main class="app">
+
+    <!-- ADMIN BUILDER -->
+    <section id="view-admin" class="glass hidden">
+      <div class="brand">
+        <div class="logo-badge">⚡</div>
+        <div>
+          <h1>Admin Protocol</h1>
+          <span>Secure Link Generator</span>
+        </div>
+      </div>
+
+      <div class="anim-item delay-1">
+        <label for="admin-upi-select">Select Receiving UPI ID</label>
+        <select id="admin-upi-select">
+          <option value="9173456004@nyes">NAVI BOBO (9173456004@nyes)</option>
+          <option value="chintanlimbachiya491@okhdfcbank">G-PAY BOB (chintanlimbachiya491@okhdfcbank)</option>
+          <option value="chintanlimbachiya491-1@okicici">G-PAY POST (chintanlimbachiya491-1@okicici)</option>
+          <option value="9173456004@fam">FAMPAY (9173456004@fam)</option>
+        </select>
+      </div>
+
+      <div class="anim-item delay-2">
+        <label for="admin-amount">Payable Amount (₹)</label>
+        <input id="admin-amount" type="number" step="0.01" min="0.01" placeholder="e.g. 500" />
+        <div id="err-amount" class="field-error"></div>
+      </div>
+
+      <div class="anim-item delay-3">
+        <label for="admin-dest">Encrypted Destination URL</label>
+        <input id="admin-dest" type="url" placeholder="https://drive.google.com/..." />
+        <div id="err-dest" class="field-error"></div>
+        <button class="btn btn-primary" id="btn-create">Generate Secure Link</button>
+      </div>
+
+      <div id="admin-res" class="hidden" style="margin-top: 20px; animation: fadeUp 0.4s both;">
+        <label>Shareable Payment Portal Link</label>
+        <input id="admin-output-url" readonly style="color: var(--accent); font-weight: 600;" />
+        <button class="btn btn-accent" id="btn-copy-gate">📋 Copy Link to Clipboard</button>
+      </div>
+    </section>
+
+    <!-- USER PAY VIEW -->
+    <section id="view-pay" class="glass hidden">
+      <div class="brand">
+        <div class="logo-badge">🛡️</div>
+        <div>
+          <h1>Secure Checkout</h1>
+          <span>End-to-End Encrypted Transfer</span>
+        </div>
+      </div>
+
+      <div class="amount-banner anim-item delay-1">
+        <small>Total Payable</small>
+        <b id="display-amount">₹ 0.00</b>
+      </div>
+
+      <div class="selected-upi-badge anim-item delay-1">
+        Verified Payee: <strong id="upi-name-tag">UPI Provider</strong>
+      </div>
+
+      <div id="pay-step-1">
+        <div class="qr-shell">
+          <div class="scanner-line"></div>
+          <img id="upi-qr" alt="Scan UPI QR Code" />
+        </div>
+        <p class="guide-text anim-item delay-2">Scan utilizing any authorized UPI application (GPay, PhonePe, Paytm) to complete the transaction.</p>
+        <div class="anim-item delay-3">
+          <button class="btn btn-primary" id="btn-paid">I Have Paid successfully</button>
+        </div>
+      </div>
+
+      <div id="pay-step-2" class="hidden">
+        <div class="anim-item delay-1">
+          <label for="utr">12-Digit UPI Reference / UTR Number</label>
+          <input id="utr" maxlength="12" inputmode="numeric" placeholder="123456789012" />
+        </div>
+        <div class="anim-item delay-2">
+          <label for="email">Receiving Email Address (For OTP)</label>
+          <input id="email" type="email" placeholder="name@example.com" />
+        </div>
+        <div class="anim-item delay-3">
+          <label for="mobile">WhatsApp / Mobile Number</label>
+          <input id="mobile" maxlength="10" inputmode="numeric" placeholder="10-digit phone" />
+          <button class="btn btn-primary" id="btn-submit-verify">Submit For Verification</button>
+        </div>
+      </div>
+
+      <div id="pay-step-done" class="hidden" style="animation: popIn 0.5s both;">
+        <div class="notice-card">
+          <span style="font-size: 2rem; display:block; margin-bottom:8px;">⏱️</span>
+          <strong>Processing Payment!</strong><br /><br />
+          Verification requires approx 5-15 minutes. Upon successful verification, your one-time 8-digit OTP will be dispatched to your email.
+        </div>
+        <div style="margin-top: 20px;">
+          <label>Save Your Unlock Portal Link</label>
+          <input id="user-portal-link" readonly style="color:var(--primary); font-weight:600;" />
+          <button class="btn btn-ghost" id="btn-copy-portal">Copy Portal Link</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADMIN APPROVAL SCREEN -->
+    <section id="view-approve" class="glass hidden">
+      <div class="brand">
+        <div class="logo-badge" style="background:var(--purple); color:#fff; box-shadow: 0 0 20px rgba(139,92,246,0.4);">🔐</div>
+        <div>
+          <h1>Admin Authorization</h1>
+          <span>Verify & Dispatch OTP</span>
+        </div>
+      </div>
+
+      <div id="approve-details" class="anim-item delay-1" style="font-size:0.9rem; color:#cbd5e1; line-height:1.8; background:rgba(255,255,255,0.03); border-radius:16px; padding:18px; border:1px solid rgba(255,255,255,0.06); box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);"></div>
+
+      <div class="anim-item delay-2">
+        <button class="btn btn-primary" id="btn-admin-approve">Approve &amp; Mail OTP</button>
+      </div>
+      <div id="approve-sent" class="notice-card hidden" style="border-color:rgba(16,185,129,0.3); color:#a7f3d0; background:rgba(16,185,129,0.07);">
+        ✅ Approval email client triggered successfully!
+      </div>
+    </section>
+
+    <!-- USER CLAIM VIEW (OTP Entry with ONE-TIME USE LOCK) -->
+    <section id="view-claim" class="glass hidden">
+      <div class="brand">
+        <div class="logo-badge" style="background:var(--accent); color:#fff;">🔑</div>
+        <div>
+          <h1>Unlock Portal</h1>
+          <span>Enter One-Time OTP</span>
+        </div>
+      </div>
+
+      <div id="claim-form">
+        <div class="anim-item delay-1">
+          <label for="claim-otp">8-Digit Secret OTP</label>
+          <input id="claim-otp" class="code-box" maxlength="8" inputmode="numeric" placeholder="••••••••" />
+          <div id="err-claim" class="field-error"></div>
+        </div>
+        <div class="anim-item delay-2">
+          <button class="btn btn-accent" id="btn-claim-access">Verify &amp; Unlock Access</button>
+        </div>
+      </div>
+
+      <div id="claim-success" class="hidden" style="text-align: center; margin-top: 10px; animation: popIn 0.6s both;">
+        <div style="font-size: 3rem; margin-bottom: 10px; text-shadow: 0 0 20px rgba(16,185,129,0.5);">✨</div>
+        <h2 style="font-family:'Space Grotesk'; font-size:1.5rem; margin-bottom: 8px; color: #fff;">Access Granted</h2>
+        <p style="font-size:0.85rem; color:var(--muted); margin-bottom:24px; line-height: 1.5;">Notice: This session is temporary. Please open and save your material immediately.</p>
+        <a id="target-link" class="btn btn-primary" href="#" target="_blank" rel="noopener noreferrer">Access Digital Content</a>
+      </div>
+
+      <div id="claim-burned" class="notice-card danger hidden" style="animation: cardEntrance 0.5s both;">
+        <span style="font-size: 2rem; display:block; margin-bottom:8px;">🛑</span>
+        <strong>Access Terminated!</strong><br /><br />
+        This one-time OTP has already been redeemed and burned. It cannot be used again for security reasons.
+      </div>
+    </section>
+
+    <p class="foot">Encrypted via PayGate Node · <a href="?mode=admin">Admin Panel</a></p>
+  </main>
+
+  <script>
+    const BOT_TOKEN = "8861476101:AAHBeX5H5UchF_9-exmWWm6xPA3wstrZ_Ec";
+    const ADMIN_CHAT_ID = "5714243957";
+
+    const params = new URLSearchParams(location.search);
+    const mode = params.get("mode");
+
+    const $ = (id) => document.getElementById(id);
+    const b64 = (s) => btoa(encodeURIComponent(s));
+    const unb64 = (s) => decodeURIComponent(atob(s));
+
+    const upiLabels = {
+      "9173456004@nyes": "NAVI BOBO",
+      "chintanlimbachiya491@okhdfcbank": "G-PAY BOB",
+      "chintanlimbachiya491-1@okicici": "G-PAY POST",
+      "9173456004@fam": "FAMPAY"
+    };
+
+    function renderQR(upi, amount) {
+      const upiUrl = `upi://pay?pa=${encodeURI(upi)}&pn=SecureGateway&am=${encodeURIComponent(amount)}&cu=INR`;
+      $("upi-qr").src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUrl)}&margin=1`;
+    }
+
+    // Helper for smooth transitions
+    function switchView(hideId, showId) {
+      const hideEl = $(hideId);
+      const showEl = $(showId);
+      hideEl.style.animation = "fadeUp 0.3s reverse both";
+      setTimeout(() => {
+        hideEl.classList.add("hidden");
+        hideEl.style.animation = "";
+        showEl.classList.remove("hidden");
+        showEl.style.animation = "fadeUp 0.5s both";
+      }, 300);
+    }
+
+    // Router Logic
+    if (mode === "admin") {
+      $("view-admin").classList.remove("hidden");
+      $("btn-create").onclick = () => {
+        const amt = parseFloat($("admin-amount").value);
+        const dest = $("admin-dest").value.trim();
+        const upi = $("admin-upi-select").value;
+
+        $("err-amount").innerText = "";
+        $("err-dest").innerText = "";
+
+        if (!amt || amt < 0.01) {
+          $("err-amount").innerText = "Please enter an amount of ₹0.01 or higher.";
+          return;
+        }
+        if (!dest.startsWith("http")) {
+          $("err-dest").innerText = "URL must start with http:// or https://";
+          return;
+        }
+
+        const payload = b64(JSON.stringify({ a: amt, u: upi, d: dest }));
+        const fullUrl = `${location.origin}${location.pathname}?g=${payload}`;
+      $("admin-output-url").value = fullUrl;
+      $("admin-res").classList.remove("hidden");
+    };
+
+    $("btn-copy-gate").onclick = () => {
+      navigator.clipboard.writeText($("admin-output-url").value);
+      const btn = $("btn-copy-gate");
+      btn.innerText = "✓ Copied!";
+      setTimeout(() => btn.innerText = "📋 Copy Link to Clipboard", 2000);
+    };
+
+  } else if (mode === "approve") {
+    $("view-approve").classList.remove("hidden");
+    const data = JSON.parse(unb64(params.get("token") || "{}"));
+
+    $("approve-details").innerHTML = `
+      <div style="margin-bottom:8px;"><b>UTR / Ref:</b> <span style="color:var(--primary); font-family:monospace; font-size:1.1rem;">${data.utr}</span></div>
+      <div style="margin-bottom:8px;"><b>Amount:</b> ₹${data.amt}</div>
+      <div style="margin-bottom:8px;"><b>Email:</b> ${data.email}</div>
+      <div style="margin-bottom:8px;"><b>Phone:</b> ${data.mobile}</div>
+      <div style="margin-top:16px; padding-top:12px; border-top:1px dashed rgba(255,255,255,0.1);"><b>Secret OTP:</b> <span style="font-family:'Space Grotesk'; font-weight:700; color:var(--accent); font-size:1.4rem; letter-spacing:2px; display:block; margin-top:4px;">${data.otp}</span></div>
+    `;
+
+    $("btn-admin-approve").onclick = () => {
+      const subject = encodeURIComponent("Access Granted · Your Premium 8-Digit Secret OTP");
+      const bodyText = 
+`Hello,
+
+Your transaction of ₹${data.amt} has been securely verified.
+
+Here is your exclusive, one-time 8-digit OTP:
+${data.otp}
+
+Access your material via the Secure Unlock Portal:
+${data.claimUrl}
+
+🔒 Security Notice: This OTP is strictly for single use. Please use it carefully.
+
+Thank you for choosing our secure gateway.`;
+
+      const mailtoUrl = `mailto:${data.email}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
+      window.open(mailtoUrl, "_blank");
+      $("approve-sent").classList.remove("hidden");
+    };
+
+  } else if (mode === "claim") {
+    $("view-claim").classList.remove("hidden");
+    const token = JSON.parse(unb64(params.get("u") || "{}"));
+    const burnKey = "premium_otp_burn_" + token.otp;
+
+    if (localStorage.getItem(burnKey)) {
+      $("claim-form").classList.add("hidden");
+      $("claim-burned").classList.remove("hidden");
+    } else {
+      $("btn-claim-access").onclick = () => {
+        const entered = $("claim-otp").value.trim();
+        if (entered === token.otp) {
+          localStorage.setItem(burnKey, "burned");
+          switchView("claim-form", "claim-success");
+          $("target-link").href = token.d;
+          
+          $("target-link").onclick = () => {
+            setTimeout(() => {
+              switchView("claim-success", "claim-burned");
+            }, 1500);
+          };
+        } else {
+          $("err-claim").innerText = "Invalid OTP. Access Denied.";
+          $("claim-otp").style.borderColor = "var(--danger)";
+          setTimeout(() => $("claim-otp").style.borderColor = "", 2000);
+        }
+      };
+    }
+
+  } else if (params.get("g")) {
+    $("view-pay").classList.remove("hidden");
+    const gate = JSON.parse(unb64(params.get("g")));
+    const upi = gate.u || "9173456004@nyes";
+    const amt = gate.a;
+
+    $("display-amount").innerText = `₹ ${amt}`;
+    $("upi-name-tag").innerText = `${upiLabels[upi] || "UPI"} (${upi})`;
+    renderQR(upi, amt);
+
+    $("btn-paid").onclick = () => {
+      switchView("pay-step-1", "pay-step-2");
+    };
+
+    $("btn-submit-verify").onclick = () => {
+      const utr = $("utr").value.trim();
+      const email = $("email").value.trim();
+      const mobile = $("mobile").value.trim();
+
+      if (utr.length !== 12 || !email.includes("@") || mobile.length !== 10) {
+        alert("Data format incorrect. Need 12-digit UTR, valid Email, and 10-digit Phone.");
+        return;
+      }
+
+      const otp = Math.floor(10000000 + Math.random() * 90000000).toString();
+      const claimToken = b64(JSON.stringify({ d: gate.d, otp: otp }));
+      const claimUrl = `${location.origin}${location.pathname}?mode=claim&u=${claimToken}`;
+
+      const approvePayload = b64(JSON.stringify({ utr, email, mobile, amt, otp, claimUrl }));
+      const adminApproveUrl = `${location.origin}${location.pathname}?mode=approve&token=${approvePayload}`;
+
+      const tgMessage = 
+`💎 <b>Premium Gateway Payment</b>
+
+<b>Amount:</b> ₹${amt}
+<b>UTR:</b> <code>${utr}</code>
+<b>Email:</b> ${email}
+<b>Mobile:</b> ${mobile}
+
+👉 <a href="${adminApproveUrl}"><b>[ CLICK HERE TO APPROVE ]</b></a>`;
+
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_CHAT_ID}&text=${encodeURIComponent(tgMessage)}&parse_mode=HTML`);
+
+      $("user-portal-link").value = claimUrl;
+      switchView("pay-step-2", "pay-step-done");
+    };
+
+    $("btn-copy-portal").onclick = () => {
+      navigator.clipboard.writeText($("user-portal-link").value);
+      const btn = $("btn-copy-portal");
+      btn.innerText = "✓ Link Copied";
+      setTimeout(() => btn.innerText = "Copy Portal Link", 2000);
+    };
+
+  } else {
+    location.href = "?mode=admin";
+  }
+</script>
+</body>
+</html>
